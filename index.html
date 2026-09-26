@@ -479,7 +479,7 @@
       level:level, full:full, shown:shown, correctKey:correctKey,
       options:options, unitLength:level.unit.length, iconMap:iconMap
     };
-    S.step = 'fence';
+    S.step = 'predict';
     S.picked = null;
     S.tileChoice = [];
     S.locked = false;
@@ -591,7 +591,11 @@
           S.predictOk = ok;
           document.getElementById('predict-next-wrap').innerHTML =
             '<button class="cta" id="to-fence-btn">확인했어요 →</button>';
-          document.getElementById('to-fence-btn').onclick = finalizeQuestion;
+          document.getElementById('to-fence-btn').onclick = function(){
+            S.step = 'fence';
+            S.locked = false;
+            renderStudentQuestion();
+          };
         };
       });
     } else {
@@ -673,11 +677,7 @@
         S.boundaryOk = ok;
         document.getElementById('fence-cta-wrap').innerHTML =
           '<button class="cta" id="finish-q-btn">다음 →</button>';
-        document.getElementById('finish-q-btn').onclick = function(){
-          S.step = 'predict';
-          S.locked = false;
-          renderStudentQuestion();
-        };
+        document.getElementById('finish-q-btn').onclick = finalizeQuestion;
       };
     }
     } catch(err){
@@ -1065,3 +1065,4 @@
 </script>
 </body>
 </html>
+
