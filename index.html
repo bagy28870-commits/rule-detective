@@ -507,7 +507,7 @@
         '<div class="who"><span class="dot" style="background:'+cfg.accent+'"></span><h2>'+cfg.label+'</h2></div>'+
         '<div class="progress-pins">'+pinsHtml+'</div>'+
       '</div>'+
-      '<div class="level-pill">🔍 지금 단계: <b>'+level.title+'</b> ('+(S.levelIndex+1)+'/'+cfg.levels.length+')</div>'+
+      '<div class="level-pill">🔍 지금 단계: <b>'+ruleDisplayHtml(level, 16)+'</b> ('+(S.levelIndex+1)+'/'+cfg.levels.length+')</div>'+
       statusBadgeHtml()+
       body +
       '<button class="cta ghost" id="quit-btn">역할 다시 선택</button>';
@@ -542,13 +542,13 @@
     var tilesHtml = full.map(function(k, idx){
       return '<button type="button" class="tile fence-tile" data-idx="'+idx+'">'+S.q.iconMap[k]+'</button>';
     }).join('');
-    var voiceText = '반복되는 무늬 한 묶음을 모두 눌러서 색칠해보세요.';
+    var voiceText = '반복되는 무늬 부분을 모두 눌러 보세요!';
     setTimeout(function(){ speak(voiceText); }, 200);
     return '<div class="case-card">'+
-      '<h3>🚧 반복되는 무늬 한 묶음을 모두 눌러 색칠해보세요! '+
+      '<h3>🚧 반복되는 무늬 부분을 모두 눌러 보세요! '+
         '<button class="voice-btn" id="voice-fence" title="다시 듣기">🔊</button></h3>'+
       '<div class="tile-row" id="fence-tiles">'+tilesHtml+'</div>'+
-      '<div class="feedback" id="fence-feedback">한 묶음이 되는 조각을 전부 눌러보세요</div>'+
+      '<div class="feedback" id="fence-feedback"></div>'+
       '<div class="cta-row" id="fence-cta-wrap">'+
         '<button class="cta" id="fence-submit" disabled>완성! 🚧</button>'+
       '</div>'+
@@ -563,7 +563,7 @@
     };
     var voiceFenceBtn = document.getElementById('voice-fence');
     if(voiceFenceBtn) voiceFenceBtn.onclick = function(){
-      speak('반복되는 무늬 한 묶음을 모두 눌러서 색칠해보세요.');
+      speak('반복되는 무늬 부분을 모두 눌러 보세요!');
     };
     if(S.step === 'predict'){
       var btns = document.querySelectorAll('.opt-btn');
@@ -665,7 +665,7 @@
         });
         var fb = document.getElementById('fence-feedback');
         fb.className = 'feedback ' + (ok?'ok':'bad');
-        fb.textContent = ok ? '정확해요! 이게 한 묶음이에요 🎉' : '조금 달라요! 정답 묶음을 보여줄게요';
+        fb.textContent = ok ? '정확해요! 이게 반복되는 부분이에요! 🎉' : '조금 달라요! 반복되는 부분을 보여줄게요';
         if(!ok){
           for(var i=0;i<unitLen;i++){
             var el2 = document.querySelector('.fence-tile[data-idx="'+i+'"]');
@@ -1065,4 +1065,3 @@
 </script>
 </body>
 </html>
-
