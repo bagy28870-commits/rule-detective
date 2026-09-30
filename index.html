@@ -906,10 +906,25 @@
 
     var grid = document.getElementById('dash-grid');
     grid.addEventListener('click', function(e){
+      var choiceEl = e.target.closest('.choice-now[data-slot]');
+      if(choiceEl){
+        toggleChosenSideFromTeacher(choiceEl.getAttribute('data-slot'), choiceEl.getAttribute('data-side'));
+        return;
+      }
       var row = e.target.closest('.log-item[data-slot]');
       if(!row) return;
       showLogDetail(row.getAttribute('data-slot'), parseInt(row.getAttribute('data-idx'),10));
     });
+
+    function toggleChosenSideFromTeacher(slot, side){
+      if(!db || !slot || !side) return;
+      var data = teacherCache[slot];
+      var current = data ? (data.chosenSide || null) : null;
+      var next = (current === side) ? null : side;
+      db.ref('students/'+slot).update({ chosenSide: next }).catch(function(err){
+        dlog('교사 화면 선택 저장 실패: ' + (err && err.message), true);
+      });
+    }
 
     function showTeacherConnBanner(){
       var b = document.getElementById('teacher-conn-banner');
@@ -1048,8 +1063,8 @@
       '<div class="stu-tab" style="background:'+cfg.accent+'"><span class="name">'+cfg.label+'</span><span>'+((data.levelIndex||0)+1)+'/'+cfg.levels.length+'</span></div>'+
       '<div class="stu-body">'+
         '<div class="ladder">'+ladder+'</div>'+
-        '<div class="level-now">🔍 내가 할 수 있는 규칙: <b>'+canDoText+'</b>'+(data.chosenSide==='can' ? '<span class="pick-stamp">✅ 선택</span>' : '')+'</div>'+
-        '<div class="challenge-now">🎯 도전 규칙: '+challengeText+(data.chosenSide==='challenge' ? '<span class="pick-stamp">✅ 선택</span>' : '')+'</div>'+
+        '<div class="level-now choice-now" data-slot="'+slot+'" data-side="can" title="눌러서 선택/해제" style="cursor:pointer;">🔍 내가 할 수 있는 규칙: <b>'+canDoText+'</b>'+(data.chosenSide==='can' ? '<span class="pick-stamp">✅ 선택</span>' : '')+'</div>'+
+        '<div class="challenge-now choice-now" data-slot="'+slot+'" data-side="challenge" title="눌러서 선택/해제" style="cursor:pointer;">🎯 도전 규칙: '+challengeText+(data.chosenSide==='challenge' ? '<span class="pick-stamp">✅ 선택</span>' : '')+'</div>'+
         statusBanner+
         '<div class="stat-row"><span>예측 정확도</span><b>'+data.predictionCorrect+'/'+data.predictionTotal+' ('+predPct+'%)</b></div>'+
         '<div class="bar-track"><div class="bar-fill" style="width:'+predPct+'%"></div></div>'+
