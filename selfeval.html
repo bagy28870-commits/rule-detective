@@ -37,7 +37,14 @@
     min-height:100vh; overflow-x:hidden;
   }
   .display{font-family:'Jua', sans-serif; letter-spacing:0.5px;}
-  #app{max-width:1100px; margin:0 auto; padding:20px 16px 60px; min-height:100vh;}
+  /* 화면 가운데에 크게: 세로는 가운데 정렬, 큰 화면(전자칠판·PC)에서는 전체를 확대 */
+  #app{
+    --z:1; zoom:var(--z);
+    max-width:1100px; margin:0 auto; padding:24px 16px 40px;
+    min-height:calc(100vh / var(--z));
+    display:flex; flex-direction:column; justify-content:center;
+  }
+  /* 배율(--z)은 아래 fit() 스크립트가 화면 크기에 맞춰 자동으로 정해요 (스크롤 없이 한 화면에 보이게) */
   button{font-family:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; touch-action:manipulation; user-select:none; -webkit-user-select:none; color:var(--ink);}
 
   /* ---- 역할 선택 ---- */
@@ -154,7 +161,7 @@
   .mini-chips span{background:var(--bg); border:2px solid var(--border); border-radius:999px; padding:4px 12px; font-size:15px;}
   .mini-chips span.fix{border-color:var(--success); background:rgba(33,179,124,.12);}
   .time{font-size:12px; color:var(--ink-soft); margin-top:4px;}
-  .back-link{background:none;border:none;color:var(--ink-soft);font-size:14px;margin-bottom:10px;padding:0;}
+  .back-link{align-self:flex-start; background:none;border:none;color:var(--ink-soft);font-size:14px;margin-bottom:10px;padding:0;}
   .empty-note{color:var(--ink-soft); font-size:14px; text-align:center; padding:6px 4px;}
   .banner-help{
     background:rgba(232,87,74,.12); border:1.5px solid var(--fail); border-radius:12px; padding:10px 14px;
@@ -293,6 +300,7 @@
 
   /* ================= 역할 선택 ================= */
   function renderRoleSelect(){
+    app.removeAttribute('data-view');
     leaveTeacher();
     S = null;
     var cards = '';
@@ -586,6 +594,7 @@
   }
 
   function renderTeacher(){
+    app.setAttribute('data-view','teacher');
     leaveTeacher();
     teacherCache = {};
     app.innerHTML =
@@ -684,6 +693,32 @@
     });
     grid.innerHTML = html;
   }
+
+  /* ===== 한 화면에 맞추기: 내용 높이를 재서 스크롤 없이 가장 크게 ===== */
+  var fitQueued = false;
+  function fit(){
+    fitQueued = false;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    app.style.setProperty('--z', '1');
+    app.style.minHeight = '0';
+    var h = app.offsetHeight || 1;          // 배율 1일 때 내용 높이
+    app.style.minHeight = '';
+    var zW = vw >= 1100 ? vw / 1100 : 1;    // 가로로 더 커질 수 있는 한계
+    var z = Math.min(vh / h, zW, 2.2);
+    if(z < 0.6) z = 0.6;                     // 너무 작아져서 읽기 어려워지는 것 방지
+    app.style.setProperty('--z', String(Math.floor(z * 100) / 100));
+  }
+  function queueFit(){
+    if(fitQueued) return;
+    fitQueued = true;
+    (window.requestAnimationFrame || setTimeout)(fit);
+  }
+  try{ new MutationObserver(queueFit).observe(app, {childList:true, subtree:true, characterData:true}); }catch(e){}
+  window.addEventListener('resize', queueFit);
+  window.addEventListener('orientationchange', queueFit);
+  window.addEventListener('load', queueFit);
+  try{ if(document.fonts && document.fonts.ready) document.fonts.ready.then(queueFit); }catch(e){}
+  queueFit();
 
   /* 연결 상태 표시 (.info/connected) */
   var offTimer = null;
